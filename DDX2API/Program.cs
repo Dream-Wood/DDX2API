@@ -27,20 +27,28 @@ app.UseHttpsRedirection();
 
 app.MapPost("/register", async (User user, AppDbContext db) =>
 {
+    Console.WriteLine($"{DateTime.Now.ToLongTimeString()} - Invoke /register");
     using SHA256 sha256Hash = SHA256.Create();
     var userPublicKey = GetHash(sha256Hash, user.Phone + Guid.NewGuid());
     var secret = userPublicKey + publicKey;
     string hash = GetHash(sha256Hash, secret);
     user.Secret = hash;
 
+
     db.Add(user);
     db.SaveChanges();
 
-    return userPublicKey;
+    var pair = new KeyPair
+    {
+        Key = userPublicKey
+    };
+
+    return Results.Ok(pair);
 });
 
 app.MapGet("/login", (HttpContext context, AppDbContext db) =>
 {
+    Console.WriteLine($"{DateTime.Now.ToLongTimeString()} - Invoke /login");
     var key = context.Request.Headers["Authorization"].ToString();
     if (key == "")
     {
@@ -56,11 +64,12 @@ app.MapGet("/login", (HttpContext context, AppDbContext db) =>
     }
 
     user[0].Secret = "";
-    return Results.Accepted(null, user[0]);
+    return Results.Ok(user[0]);
 });
 
 app.MapGet("/getUserInfo/{id}", (int id, HttpContext context, AppDbContext db) =>
 {
+    Console.WriteLine($"{DateTime.Now.ToLongTimeString()} - Invoke /getUserInfo");
     var key = context.Request.Headers["Authorization"].ToString();
     if (key == "")
     {
@@ -89,11 +98,12 @@ app.MapGet("/getUserInfo/{id}", (int id, HttpContext context, AppDbContext db) =
         Name = profile.Name
     };
     
-    return Results.Accepted(null, info);
+    return Results.Ok(info);
 });
 
 app.MapGet("/getMyProfile", (HttpContext context, AppDbContext db) =>
 {
+    Console.WriteLine($"{DateTime.Now.ToLongTimeString()} - Invoke /getMyProfile");
     var key = context.Request.Headers["Authorization"].ToString();
     if (key == "")
     {
@@ -110,11 +120,12 @@ app.MapGet("/getMyProfile", (HttpContext context, AppDbContext db) =>
 
     var profile = db.UserProfiles.Find(user[0].Id);
     
-    return Results.Accepted(null, profile);
+    return Results.Ok(profile);
 });
 
 app.MapPost("/saveMyProfile", (HttpContext context, UserProfile profile, AppDbContext db) =>
 {
+    Console.WriteLine($"{DateTime.Now.ToLongTimeString()} - Invoke /saveMyProfile");
     var key = context.Request.Headers["Authorization"].ToString();
     if (key == "")
     {
@@ -137,12 +148,14 @@ app.MapPost("/saveMyProfile", (HttpContext context, UserProfile profile, AppDbCo
     db.Entry(profile).State = EntityState.Modified;
     db.SaveChanges();
     
-    return Results.Accepted(null, profile);
+    return Results.Ok(profile);
 });
 
 
 app.MapGet("/chats", (HttpContext context, AppDbContext db) =>
 {
+    Console.WriteLine($"{DateTime.Now.ToLongTimeString()} - Invoke /chats");
+    
     var key = context.Request.Headers["Authorization"].ToString();
     if (key == "")
     {
@@ -164,11 +177,13 @@ app.MapGet("/chats", (HttpContext context, AppDbContext db) =>
         chats.Add(db.Chats.Find(i));
     }
 
-    return Results.Accepted(null, chats);
+    return Results.Ok(chats);
 });
 
 app.MapPost("/newChat", (HttpContext context, Chat chat, AppDbContext db) =>
 {
+    Console.WriteLine($"{DateTime.Now.ToLongTimeString()} - Invoke /newChat");
+
     var key = context.Request.Headers["Authorization"].ToString();
     if (key == "")
     {
@@ -212,11 +227,13 @@ app.MapPost("/newChat", (HttpContext context, Chat chat, AppDbContext db) =>
         chats.Add(db.Chats.Find(i));
     }
 
-    return Results.Accepted(null, chats);
+    return Results.Ok(chats);
 });
 
 app.MapPost("/sendMessage", (HttpContext context, Message msg, AppDbContext db) =>
 {
+    Console.WriteLine($"{DateTime.Now.ToLongTimeString()} - Invoke /sendMessage");
+    
     var key = context.Request.Headers["Authorization"].ToString();
     if (key == "")
     {
@@ -265,11 +282,12 @@ app.MapPost("/sendMessage", (HttpContext context, Message msg, AppDbContext db) 
 
     db.SaveChanges();
 
-    return Results.Accepted(null, msg);
+    return Results.Ok(msg);
 });
 
 app.MapPost("/loadMessages", (HttpContext context, Chat chat, AppDbContext db) =>
 {
+    Console.WriteLine($"{DateTime.Now.ToLongTimeString()} - Invoke /loadMessages");
     var key = context.Request.Headers["Authorization"].ToString();
     if (key == "")
     {
@@ -294,7 +312,7 @@ app.MapPost("/loadMessages", (HttpContext context, Chat chat, AppDbContext db) =
     }
 
     db.Entry(chat).Collection(u => u.Messages).Load();
-    return Results.Accepted(null, chat.Messages);
+    return Results.Ok(chat.Messages);
 });
 
 
