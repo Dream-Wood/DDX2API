@@ -8,6 +8,7 @@ public class UserProfile
     public int UserId { get; set; }
     public UserSex Sex { get; set; }
     public UserLevel Level { get; set; }
+    public string Name { get; set; }
     
     //Trainer futures
     public string PlaylistLink { get; set; }

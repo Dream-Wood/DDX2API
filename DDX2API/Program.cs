@@ -59,6 +59,39 @@ app.MapGet("/login", (HttpContext context, AppDbContext db) =>
     return Results.Accepted(null, user[0]);
 });
 
+app.MapGet("/getUserInfo/{id}", (int id, HttpContext context, AppDbContext db) =>
+{
+    var key = context.Request.Headers["Authorization"].ToString();
+    if (key == "")
+    {
+        return Results.BadRequest();
+    }
+
+    using SHA256 sha256Hash = SHA256.Create();
+    string hash = GetHash(sha256Hash, key + publicKey);
+    var user = (from u in db.Users where u.Secret == hash select u).ToList();
+    if (!user.Any())
+    {
+        return Results.Unauthorized();
+    }
+
+    var profile = db.UserProfiles.Find(id);
+
+    if (profile == null)
+    {
+        return Results.NotFound();
+    }
+
+    var info = new UserModel
+    {
+        UserId = id,
+        City = profile.City,
+        Name = profile.Name
+    };
+    
+    return Results.Accepted(null, info);
+});
+
 app.MapGet("/getMyProfile", (HttpContext context, AppDbContext db) =>
 {
     var key = context.Request.Headers["Authorization"].ToString();
@@ -286,16 +319,4 @@ string GetHash(HashAlgorithm hashAlgorithm, string input)
 
     // Return the hexadecimal string.
     return sBuilder.ToString();
-}
-
-// Verify a hash against a string.
-bool VerifyHash(HashAlgorithm hashAlgorithm, string input, string hash)
-{
-    // Hash the input.
-    var hashOfInput = GetHash(hashAlgorithm, input);
-
-    // Create a StringComparer an compare the hashes.
-    StringComparer comparer = StringComparer.OrdinalIgnoreCase;
-
-    return comparer.Compare(hashOfInput, hash) == 0;
 }
