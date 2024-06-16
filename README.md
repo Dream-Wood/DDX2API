@@ -1,7 +1,3 @@
----
-
-
----
 
 <h1 id="ddx2api">DDX2API</h1>
 <p>Этот репозиторий содержит код для серверного API, предназначенного для мобильного приложения-ассистента. Приложение помогает в создании планов тренировок и облегчает коммуникацию между тренерами и пользователями. API построен с использованием .NET 8 и C# Web API.</p>
@@ -40,7 +36,8 @@ cd DDX2API
 <li>Настройте базу данных PostgreSQL и обновите строку подключения в <code>appsettings.json</code>:</li>
 </ol>
 <blockquote>
-<pre><code> {
+<pre><code> 
+    {
     "ConnectionStrings": {
         "DbConnection": "Host=your_host;Database=your_database;Username=your_username;Password=your_password"
     },
@@ -51,7 +48,7 @@ cd DDX2API
 <ol start="3">
 <li>Восстановите зависимости и запустите приложение:</li>
 </ol>
-<blockquote>
+<blockquote
 <p>dotnet restore<br>
 dotnet run</p>
 </blockquote>
